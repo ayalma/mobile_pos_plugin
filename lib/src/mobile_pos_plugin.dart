@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:image/image.dart';
 
 import 'package:flutter/foundation.dart';
@@ -118,9 +119,9 @@ class MobilePosPlugin {
   Future<int> getPrinterStatus() =>
       _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
 
-  Future<bool> print(Image image, PrinterPrintCallback printCallback) {
+  Future<bool> print(Uint8List image, PrinterPrintCallback printCallback) {
     _printerPrintCallback = printCallback;
-    return _methodChannel.invokeMethod(_PRINTER_PRINT, image.getBytes());
+    return _methodChannel.invokeMethod(_PRINTER_PRINT, image);
   }
 
   Future<bool> purchase(
