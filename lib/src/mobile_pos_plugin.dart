@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:image/image.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos_plugin/src/host_app.dart';
 import 'package:mobile_pos_plugin/src/payment.dart';
-
 
 typedef OpenMagnetCallback = Future<void> Function(List<String>);
 typedef OpenBarcodeScannerSuccessCallback = Future<void> Function(
@@ -118,9 +118,9 @@ class MobilePosPlugin {
   Future<int> getPrinterStatus() =>
       _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
 
-  Future<bool> print(String posPrintData,PrinterPrintCallback printCallback) {
+  Future<bool> print(Image image, PrinterPrintCallback printCallback) {
     _printerPrintCallback = printCallback;
-    return _methodChannel.invokeMethod(_PRINTER_PRINT,posPrintData);
+    return _methodChannel.invokeMethod(_PRINTER_PRINT, image.getBytes());
   }
 
   Future<bool> purchase(
@@ -137,7 +137,8 @@ class MobilePosPlugin {
     _paymentFailedCallback = paymentFailedCallback;
     _paymentSucceedCallback = paymentSucceedCallback;
 
-    return _methodChannel.invokeMethod(_PURCHASE, [invoiceNumber, amount,hostApp.toString()]);
+    return _methodChannel
+        .invokeMethod(_PURCHASE, [invoiceNumber, amount, hostApp.toString()]);
   }
 
   Future _methodHandler(MethodCall call) {

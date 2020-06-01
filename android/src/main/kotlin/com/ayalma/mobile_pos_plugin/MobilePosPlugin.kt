@@ -16,7 +16,6 @@ import com.kishcore.sdk.hybrid.api.SDKManager
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
-import java.util.*
 
 
 /** FlutterHybridCpPlugin */
@@ -96,7 +95,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         OPEN_MAGNETIC_CARD_READER -> openMagneticStripeCardReader(result)
         OPEN_BARCODE_SCANNER -> openBarcodeScanner(result)
         GET_PRINTER_STATUS -> getPrinterStatus(result)
-        PRINTER_PRINT -> print(result, call.arguments)
+        PRINTER_PRINT -> print(result, call.arguments as ByteArray)
         PURCHASE -> purchase(result, call.arguments as List<String>)
         else -> result.notImplemented()
     }
@@ -181,8 +180,9 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         result.success(true);
     }
 
-    private fun print(result: Result, arguments: Any) {
-        SDKManager.print(activity, FactorPrintableData(), DataCallback { data ->
+    private fun print(result: Result, bytes: ByteArray) {
+
+        SDKManager.print(activity, FactorPrintableData(bytes), DataCallback { data ->
             channel?.invokeMethod(PRINTER_PRINT_CALLBACK, data.toList())
 
         })
