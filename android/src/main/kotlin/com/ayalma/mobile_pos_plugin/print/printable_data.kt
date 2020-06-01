@@ -18,8 +18,7 @@ public class FactorPrintableData(private  var bytes: ByteArray) : PrintableData 
         val printImage = root.findViewById<ImageView>(R.id.printImage);
 
         printImage.setImageBitmap(bmp)
-        printImage.setImageBitmap(Bitmap.createScaledBitmap(bmp, printImage.width,
-                printImage.height, false))
+        printImage.setImageBitmap(Bitmap.createBitmap(bmp))
         root?.requestLayout()
         return root
     }
