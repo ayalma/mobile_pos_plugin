@@ -5,3 +5,7 @@
 .pub/
 
 build/
+**/android/.classpath
+**/.project
+**/.settings
+**/.classpath
