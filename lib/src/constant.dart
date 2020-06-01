@@ -1,0 +1,15 @@
+const int STATUS_NO_PAPER = 0;
+const int STATUS_OK = 1;
+const int STATUS_UNKNOWN = -1;
+const int STATUS_HARDERR = 2;
+const int STATUS_OVERHEAT = 3;
+const int STATUS_LOWVOL = 4;
+const int STATUS_PAPERJAM = 5;
+const int STATUS_BUSY = 6;
+const int STATUS_LIFTHEAD = 7;
+const int STATUS_CUTPOSITIONERR = 8;
+const int STATUS_LOWTEMP = 9;
+const int DEVICE_FORCE_CLOSED = -109;
+const int DEVICE_USED = -113;
+const int DEVICE_NOT_OPEN = -112;
+const int TIMEOUT = -106;
