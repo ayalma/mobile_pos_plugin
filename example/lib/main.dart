@@ -15,10 +15,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  MobilePosPlugin mobilePosPlugin;
 
   @override
   void initState() {
     super.initState();
+    mobilePosPlugin = MobilePosPlugin();
     initPlatformState();
   }
 
@@ -27,7 +29,7 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await MobilePosPlugin.platformVersion;
+      platformVersion = mobilePosPlugin.toString();
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
