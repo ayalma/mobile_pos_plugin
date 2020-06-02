@@ -1,9 +1,9 @@
 package com.ayalma.mobile_pos_plugin
 
-import FactorPrintableData
 import android.app.Activity
 import android.util.Log
 import androidx.annotation.NonNull
+import com.ayalma.mobile_pos_plugin.print.FactorPrintableData
 import com.kishcore.sdk.sep.rahyab.api.PaymentCallback
 import com.kishcore.sdk.hybrid.api.DataCallback
 import io.flutter.embedding.engine.plugins.FlutterPlugin
