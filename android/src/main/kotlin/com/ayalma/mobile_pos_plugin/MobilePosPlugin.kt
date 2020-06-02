@@ -80,7 +80,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onAttachedToEngine(flutterPluginBinding.binaryMessenger)
     }
 
-    private fun onAttachedToEngine(messenger: BinaryMessenger) {
+    fun onAttachedToEngine(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, "mobile_pos_plugin")
         channel?.setMethodCallHandler(this)
     }
