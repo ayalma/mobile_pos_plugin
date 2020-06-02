@@ -1,4 +1,4 @@
-package com.sabzafzar.flutter_hybrid_cp
+package com.ayalma.mobile_pos_plugin
 
 import android.content.ContentValues.TAG
 import androidx.annotation.ColorInt
