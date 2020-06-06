@@ -119,9 +119,18 @@ class MobilePosPlugin {
   Future<int> getPrinterStatus() =>
       _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
 
+  @Deprecated('Use printAsync')
   Future<bool> print(Uint8List image, PrinterPrintCallback printCallback) {
     _printerPrintCallback = printCallback;
     return _methodChannel.invokeMethod(_PRINTER_PRINT, image);
+  }
+
+  Completer<List<dynamic>> printComplater;
+  Future<List<dynamic>> printAsync(Uint8List image) async {
+    printComplater = Completer();
+    final result = await _methodChannel.invokeMethod(_PRINTER_PRINT, image);
+    if (!result) printComplater.completeError('Error happend');
+    return printComplater.future;
   }
 
   Future<bool> purchase(
@@ -153,7 +162,10 @@ class MobilePosPlugin {
       case _OPEN_BARCODE_SCANNER_FAILURE_CALLBACK:
         return _barcodeScannerFailureCallback(call.arguments);
       case _PRINTER_PRINT_CALLBACK:
-        return _printerPrintCallback(call.arguments);
+        printComplater.complete(call.arguments);
+        if (_printerPrintCallback != null)
+          return _printerPrintCallback(call.arguments);
+        break;
       case _PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED:
         return _paymentInitializationFailedCallback(
             PaymentInitializationFailed.fromList(_hostApp, call.arguments));
