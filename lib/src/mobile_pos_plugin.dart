@@ -73,11 +73,6 @@ class MobilePosPlugin {
   OpenBarcodeScannerSuccessCallback _barcodeScannerSuccessCallback;
   OpenBarcodeScannerFailureCallback _barcodeScannerFailureCallback;
   PrinterPrintCallback _printerPrintCallback;
-  PaymentInitializationFailedCallback _paymentInitializationFailedCallback;
-  PaymentCancelledCallback _paymentCancelledCallback;
-  PaymentFailedCallback _paymentFailedCallback;
-  PaymentSucceedCallback _paymentSucceedCallback;
-
   HostApp _hostApp;
 
   ///
@@ -133,22 +128,16 @@ class MobilePosPlugin {
     return printComplater.future;
   }
 
-  Future<bool> purchase(
+  Completer<PaymentResult> _purchaseComplator;
+  Future<PaymentResult> purchase(
     String invoiceNumber,
     String amount,
     HostApp hostApp,
-    PaymentInitializationFailedCallback paymentInitializationFailedCallback,
-    PaymentCancelledCallback paymentCancelledCallback,
-    PaymentFailedCallback paymentFailedCallback,
-    PaymentSucceedCallback paymentSucceedCallback,
   ) {
-    _paymentInitializationFailedCallback = paymentInitializationFailedCallback;
-    _paymentCancelledCallback = paymentCancelledCallback;
-    _paymentFailedCallback = paymentFailedCallback;
-    _paymentSucceedCallback = paymentSucceedCallback;
-
-    return _methodChannel
+    _purchaseComplator = Completer();
+    _methodChannel
         .invokeMethod(_PURCHASE, [invoiceNumber, amount, hostApp.toString()]);
+    return _purchaseComplator.future;
   }
 
   Future _methodHandler(MethodCall call) {
@@ -165,19 +154,23 @@ class MobilePosPlugin {
         printComplater.complete(call.arguments);
         if (_printerPrintCallback != null)
           return _printerPrintCallback(call.arguments);
-        break;
+        return Future.value();
       case _PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED:
-        return _paymentInitializationFailedCallback(
+        _purchaseComplator.complete(
             PaymentInitializationFailed.fromList(_hostApp, call.arguments));
+        return Future.value();
       case _PURCHASE_ON_PAYMENT_CANCELLED:
-        return _paymentCancelledCallback(
-            PaymentCancelled.fromList(_hostApp, call.arguments));
+        _purchaseComplator
+            .complete(PaymentCancelled.fromList(_hostApp, call.arguments));
+        return Future.value();
       case _PURCHASE_ON_PAYMENT_FAILED:
-        return _paymentFailedCallback(
-            PaymentFailed.fromList(_hostApp, call.arguments));
+        _purchaseComplator
+            .complete(PaymentFailed.fromList(_hostApp, call.arguments));
+        return Future.value();
       case _PURCHASE_ON_PAYMENT_SUCCEED:
-        return _paymentSucceedCallback(
-            PaymentSucceed.fromList(_hostApp, call.arguments));
+        _purchaseComplator
+            .complete(PaymentSucceed.fromList(_hostApp, call.arguments));
+        return Future.value();
       default:
         return Future.error('method not defined');
     }

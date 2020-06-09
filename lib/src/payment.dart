@@ -1,6 +1,8 @@
 import 'package:mobile_pos_plugin/src/host_app.dart';
 
-class PaymentInitializationFailed {
+abstract class PaymentResult {}
+
+class PaymentInitializationFailed extends PaymentResult {
   final int status;
   final String statusDescription;
   final String reserveNumber;
@@ -46,7 +48,7 @@ class PaymentInitializationFailed {
   }
 }
 
-class PaymentCancelled {
+class PaymentCancelled extends PaymentResult {
   final String reserveNumber;
   final String maskedPan;
 
@@ -80,7 +82,7 @@ class PaymentCancelled {
   }
 }
 
-class PaymentFailed {
+class PaymentFailed extends PaymentResult {
   final int errorCode;
   final String errorDescription;
   final String terminalNo;
@@ -151,7 +153,7 @@ class PaymentFailed {
   }
 }
 
-class PaymentSucceed {
+class PaymentSucceed extends PaymentResult {
   final String terminalNo;
   final String merchantId;
   final String posSerial;
