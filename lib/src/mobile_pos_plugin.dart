@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:image/image.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -68,8 +67,6 @@ class MobilePosPlugin {
   static MobilePosPlugin _instance;
 
   final MethodChannel _methodChannel;
-
-  OpenMagnetCallback _magnetCallback;
   OpenBarcodeScannerSuccessCallback _barcodeScannerSuccessCallback;
   OpenBarcodeScannerFailureCallback _barcodeScannerFailureCallback;
   PrinterPrintCallback _printerPrintCallback;
@@ -88,12 +85,21 @@ class MobilePosPlugin {
   ///
   /// this method make magnet card reader active
   ///
-  Future<bool> openMagneticStripeCardReader(
-      OpenMagnetCallback openMagnetCallback) async {
-    _magnetCallback = openMagnetCallback;
-    final bool result =
-        await _methodChannel.invokeMethod(_OPEN_MAGNETIC_CARD_READER);
-    return result;
+
+  Completer<List<String>> _magnetCardComplator;
+  Future<List<String>> openMagneticStripeCardReader() async {
+    _magnetCardComplator = Completer();
+    try {
+      final bool result =
+          await _methodChannel.invokeMethod(_OPEN_MAGNETIC_CARD_READER);
+      if (result == false) {
+        _magnetCardComplator.completeError('خطا در بازکردن کارت ریدر');
+      }
+    } catch (error) {
+      _magnetCardComplator.completeError(error);
+    }
+
+    return _magnetCardComplator.future;
   }
 
   ///
@@ -144,8 +150,8 @@ class MobilePosPlugin {
     switch (call.method) {
       case _OPEN_MAGNETIC_CARD_READER_CALLBACK:
         var args = call.arguments;
-        return _magnetCallback([args[0] as String, args[1] as String]);
-        break;
+        _magnetCardComplator.complete([args[0] as String, args[1] as String]);
+        return Future.value();
       case _OPEN_BARCODE_SCANNER_SUCCESS_CALLBACK:
         return _barcodeScannerSuccessCallback(call.arguments);
       case _OPEN_BARCODE_SCANNER_FAILURE_CALLBACK:
