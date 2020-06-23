@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('rahyab-hybrid-cpsdk-1.0.11.aar'))

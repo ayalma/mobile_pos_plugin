@@ -43,4 +43,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation group: 'androidx.annotation', name: 'annotation', version: '1.1.0'
     implementation group: 'androidx.core', name: 'core', version: '1.2.0'
+    implementation project(path: ':rahyab-hybrid-cpsdk-1.0.11')
 }

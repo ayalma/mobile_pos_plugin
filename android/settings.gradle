@@ -1,1 +1,2 @@
+include ':rahyab-hybrid-cpsdk-1.0.11'
 rootProject.name = 'mobile_pos_plugin'
