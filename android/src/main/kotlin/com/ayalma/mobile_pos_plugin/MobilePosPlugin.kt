@@ -116,19 +116,19 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         activity?.let {
             if (hostApp == "HostApp.FANAVA") {
                 com.kishcore.sdk.fanava.rahyab.api.SDKManager.purchase(it, invoiceNumber, amount, object : com.kishcore.sdk.fanava.rahyab.api.PaymentCallback {
-                    override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?) {
+                    override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?,panHash:String?) {
                         channel?.invokeMethod(PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED, arrayListOf(reserveNumber, maskedPan, errorDescription))
                     }
 
-                    override fun onPaymentCancelled(reserveNumber: String?, maskedPan: String?) {
+                    override fun onPaymentCancelled(reserveNumber: String?, maskedPan: String?,panHash:String?) {
                         channel?.invokeMethod(PURCHASE_ON_PAYMENT_CANCELLED, arrayListOf(reserveNumber, maskedPan))
                     }
 
-                    override fun onPaymentSucceed(terminalNo: String?, merchantId: String?, posSerial: String?, reserveNumber: String?, traceNumber: String?, rrn: String?, ref: String?, amount: String?, txnDate: String?, txnTime: String?, maskedPan: String?) {
+                    override fun onPaymentSucceed(terminalNo: String?, merchantId: String?, posSerial: String?, reserveNumber: String?, traceNumber: String?, rrn: String?, ref: String?, amount: String?, txnDate: String?, txnTime: String?, maskedPan: String?,panHash:String?) {
                         channel?.invokeMethod(PURCHASE_ON_PAYMENT_SUCCEED, arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
                     }
 
-                    override fun onPaymentFailed(errorCode: Int, errorDescription: String, terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String) {
+                    override fun onPaymentFailed(errorCode: Int, errorDescription: String, terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String,panHash:String?) {
                         channel?.invokeMethod(PURCHASE_ON_PAYMENT_FAILED, arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
                     }
                 })
