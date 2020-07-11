@@ -1,28 +1,32 @@
 package com.ayalma.mobile_pos_plugin
 
 import android.app.Activity
+import android.device.PrinterManager
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.NonNull
 import com.ayalma.mobile_pos_plugin.print.FactorPrintableData
-import com.kishcore.sdk.sep.rahyab.api.PaymentCallback
 import com.kishcore.sdk.hybrid.api.DataCallback
+import com.kishcore.sdk.hybrid.api.HostApp
+import com.kishcore.sdk.hybrid.api.SDKManager
+import com.kishcore.sdk.sep.rahyab.api.PaymentCallback
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
-import com.kishcore.sdk.hybrid.api.SDKManager
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.BinaryMessenger
-
-
 /** FlutterHybridCpPlugin */
 public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     var activity: Activity? = null
     var channel: MethodChannel? = null
+    var printerManager:PrinterManager? = null;
+    var sdkType:SdkType = SdkType.Unknown;
+
 
 
      // This static function is optional and equivalent to onAttachedToEngine. It supports the old
@@ -103,7 +107,19 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun init(result: Result) {
         (activity?.let {
             val hostApp = SDKManager.init(activity)
-            result.success(hostApp.name)
+            if(hostApp == HostApp.UNKNOWN)
+            {
+                sdkType = SdkType.Rahyab;
+                result.success(hostApp.name)
+            }
+            else{
+                sdkType = SdkType.Rahyab;
+                printerManager = PrinterManager();
+                printerManager?.setupPage(384, -1)
+            }
+
+
+
         }
                 ?: run {
                     result.error("Activity is null", null, null)
@@ -181,11 +197,14 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun print(result: Result, bytes: ByteArray) {
+        val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
 
-        SDKManager.print(activity, FactorPrintableData(bytes), DataCallback { data ->
-            channel?.invokeMethod(PRINTER_PRINT_CALLBACK, data.toList())
+        printerManager?.drawBitmap(bmp,bmp.width,bmp.height);
 
-        })
+//        SDKManager.print(activity, FactorPrintableData(bytes), DataCallback { data ->
+//            channel?.invokeMethod(PRINTER_PRINT_CALLBACK, data.toList())
+//
+//        })
         result.success(true)
     }
 
@@ -240,3 +259,9 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
 }
+
+enum class  SdkType{
+    Pna,
+    Rahyab,
+    Unknown,
+};

@@ -29,6 +29,8 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
+      await mobilePosPlugin.init();
+
       platformVersion = mobilePosPlugin.toString();
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
