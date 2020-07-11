@@ -116,6 +116,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 sdkType = SdkType.Rahyab;
                 printerManager = PrinterManager();
                 printerManager?.setupPage(384, -1)
+                result.success(HostApp.UNKNOWN);
             }
 
 
