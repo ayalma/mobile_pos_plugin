@@ -107,7 +107,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun init(result: Result) {
         (activity?.let {
             val hostApp = SDKManager.init(activity)
-            if(hostApp == HostApp.UNKNOWN)
+            if(hostApp != HostApp.UNKNOWN)
             {
                 sdkType = SdkType.Rahyab;
                 result.success(hostApp.name)
