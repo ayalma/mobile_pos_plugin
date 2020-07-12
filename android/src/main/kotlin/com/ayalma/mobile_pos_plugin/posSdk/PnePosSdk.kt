@@ -12,6 +12,7 @@ import kotlin.coroutines.suspendCoroutine
 class PnePosSdk(private var activity: Activity) : PosSdk {
     var printerManager : PrinterManager = PrinterManager();
     override fun print(byteArray: ByteArray, printEnd: (List<Any>) -> Unit) {
+        printerManager.setupPage(381,-1)
         val bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size);
         printerManager.drawBitmap(bmp,0,0);
         printerManager.printPage(0)
