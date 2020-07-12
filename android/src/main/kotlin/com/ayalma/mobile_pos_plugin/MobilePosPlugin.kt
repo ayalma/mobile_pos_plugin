@@ -1,10 +1,14 @@
 package com.ayalma.mobile_pos_plugin
 
 import android.app.Activity
+import android.content.Intent
 import android.device.PrinterManager
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.NonNull
+import com.ayalma.mobile_pos_plugin.posSdk.PosSdk
+import com.ayalma.mobile_pos_plugin.posSdk.PosSdkFactory
+import com.ayalma.mobile_pos_plugin.posSdk.SdkType
 import com.ayalma.mobile_pos_plugin.print.FactorPrintableData
 import com.kishcore.sdk.hybrid.api.DataCallback
 import com.kishcore.sdk.hybrid.api.HostApp
@@ -18,18 +22,23 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
 /** FlutterHybridCpPlugin */
-public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
+    /**
+     * You can registrar
+     * */
+    var registrar: Registrar? = null
+    var binding:ActivityPluginBinding?=null
 
     var activity: Activity? = null
     var channel: MethodChannel? = null
-    var printerManager:PrinterManager? = null;
-    var sdkType:SdkType = SdkType.Unknown;
+    var posSdk:PosSdk?=null;
 
 
 
-     // This static function is optional and equivalent to onAttachedToEngine. It supports the old
+    // This static function is optional and equivalent to onAttachedToEngine. It supports the old
     // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
     // plugin registration via this function while apps migrate to use the new Android APIs
     // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
@@ -57,6 +66,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             val instance = MobilePosPlugin()
+            instance.registrar = registrar
             instance.activity = registrar.activity()
             instance.onAttachedToEngine(registrar.messenger())
         }
@@ -64,14 +74,17 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     override fun onDetachedFromActivity() {
         activity = null
+        binding = null
         Log.d("Hybrid", "on detached form activity")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        Log.d("Hybrid", "on Reattached to activity for config changes")
+        this.binding = binding
+        activity = binding.activity;
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        this.binding = binding
         activity = binding.activity;
         Log.d("Hybrid", "on Attached to activity")
     }
@@ -95,7 +108,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) = when (call.method) {
-        INIT -> init(result)
+        INIT -> init(result,(call.arguments as List<String>)[0])
         OPEN_MAGNETIC_CARD_READER -> openMagneticStripeCardReader(result)
         OPEN_BARCODE_SCANNER -> openBarcodeScanner(result)
         GET_PRINTER_STATUS -> getPrinterStatus(result)
@@ -104,23 +117,12 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         else -> result.notImplemented()
     }
 
-    private fun init(result: Result) {
+    private fun init(result: Result, sdkType:String) {
         (activity?.let {
-            val hostApp = SDKManager.init(activity)
-            if(hostApp != HostApp.UNKNOWN)
-            {
-                sdkType = SdkType.Rahyab;
-                result.success(hostApp.name)
-            }
-            else{
-                sdkType = SdkType.Rahyab;
-                printerManager = PrinterManager();
-                printerManager?.setupPage(384, -1)
-                result.success(HostApp.UNKNOWN);
-            }
-
-
-
+            posSdk = PosSdkFactory.create(SdkType.valueOf(sdkType),it);
+            registrar?.addActivityResultListener(posSdk);
+            binding?.addActivityResultListener(posSdk as PluginRegistry.ActivityResultListener)
+            result.success(HostApp.UNKNOWN.name)
         }
                 ?: run {
                     result.error("Activity is null", null, null)
@@ -197,15 +199,11 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         result.success(true);
     }
 
-    private fun print(result: Result, bytes: ByteArray) {
-        val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size);
+    private  fun print(result: Result, bytes: ByteArray) {
 
-        printerManager?.drawBitmap(bmp,bmp.width,bmp.height);
-
-//        SDKManager.print(activity, FactorPrintableData(bytes), DataCallback { data ->
-//            channel?.invokeMethod(PRINTER_PRINT_CALLBACK, data.toList())
-//
-//        })
+        posSdk?.print(bytes) { data->
+            channel?.invokeMethod(PRINTER_PRINT_CALLBACK, data)
+        }
         result.success(true)
     }
 
@@ -259,10 +257,6 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
     }
 
-}
 
-enum class  SdkType{
-    Pna,
-    Rahyab,
-    Unknown,
-};
+
+}

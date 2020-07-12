@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos_plugin/src/host_app.dart';
 import 'package:mobile_pos_plugin/src/payment.dart';
+import 'package:mobile_pos_plugin/src/sdk_type.dart';
 
 typedef OpenMagnetCallback = Future<void> Function(List<String>);
 typedef OpenBarcodeScannerSuccessCallback = Future<void> Function(
@@ -75,10 +76,10 @@ class MobilePosPlugin {
   ///
   /// with this method you will init the payment lib
   ///
-  Future<HostApp> init() async {
-    _hostApp = await _methodChannel
-        .invokeMethod(_INIT)
-        .then((hostName) => parseHostApp(hostName));
+  Future<HostApp> init(SdkType sdkType) async {
+    _hostApp = await _methodChannel.invokeMethod(_INIT, [
+      sdkType.toString().replaceAll('SdkType.', '')
+    ]).then((hostName) => parseHostApp(hostName));
     return _hostApp;
   }
 
