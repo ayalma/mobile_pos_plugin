@@ -6,5 +6,7 @@ interface PosSdk: PluginRegistry.ActivityResultListener {
     /***
      * print
      */
-    fun print(byteArray:ByteArray,printEnd:(List<Any>)->Unit)
+    fun  print(byteArray:ByteArray,printEnd:(List<Any>)->Unit)
+    fun  getPrinterStatus():PrinterStatus
+    fun  purchase(amount:String)
 }

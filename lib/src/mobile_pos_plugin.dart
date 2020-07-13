@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos_plugin/src/host_app.dart';
 import 'package:mobile_pos_plugin/src/payment.dart';
+import 'package:mobile_pos_plugin/src/printer_status.dart';
 import 'package:mobile_pos_plugin/src/sdk_type.dart';
 
 typedef OpenMagnetCallback = Future<void> Function(List<String>);
@@ -118,8 +119,11 @@ class MobilePosPlugin {
   /// get printer status
   /// this method will return an integer number for checking status you must compare it to constant from [constant] class
   ///
-  Future<int> getPrinterStatus() =>
-      _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
+  Future<PrinterStatus> getPrinterStatus() async {
+    final printerStatus =
+        await _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
+    return parsePrinterStatus(printerStatus);
+  }
 
   @Deprecated('Use printAsync')
   Future<bool> print(Uint8List image, PrinterPrintCallback printCallback) {

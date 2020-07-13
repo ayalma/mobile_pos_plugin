@@ -132,6 +132,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
         var invoiceNumber = args[0]
         var amount = args[1]
         var hostApp = args[2]
+
         activity?.let {
             if (hostApp == "HostApp.FANAVA") {
                 com.kishcore.sdk.fanava.rahyab.api.SDKManager.purchase(it, invoiceNumber, amount, object : com.kishcore.sdk.fanava.rahyab.api.PaymentCallback {
@@ -208,7 +209,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
     }
 
     private fun getPrinterStatus(result: Result) =
-            result.success(SDKManager.getPrinterStatus())
+            result.success(posSdk?.getPrinterStatus())
 
     private fun openBarcodeScanner(result: Result) =
             activity?.let {
