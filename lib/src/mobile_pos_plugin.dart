@@ -121,14 +121,8 @@ class MobilePosPlugin {
   ///
   Future<PrinterStatus> getPrinterStatus() async {
     final printerStatus =
-        await _methodChannel.invokeMethod(_GET_PRINTER_STATUS);
+        await _methodChannel.invokeMethod<String>(_GET_PRINTER_STATUS);
     return parsePrinterStatus(printerStatus);
-  }
-
-  @Deprecated('Use printAsync')
-  Future<bool> print(Uint8List image, PrinterPrintCallback printCallback) {
-    _printerPrintCallback = printCallback;
-    return _methodChannel.invokeMethod(_PRINTER_PRINT, image);
   }
 
   Completer<List<dynamic>> printComplater;

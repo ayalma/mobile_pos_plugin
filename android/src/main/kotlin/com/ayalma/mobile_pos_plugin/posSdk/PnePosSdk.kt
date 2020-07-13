@@ -23,6 +23,7 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
         printEnd.invoke(ArrayList(0))
     }
 
+
     override fun getPrinterStatus(): PrinterStatus = when(printerManager.prn_getStatus()){
             0->PrinterStatus.Ok
             -1->PrinterStatus.NoPaper
@@ -31,10 +32,12 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
             else->PrinterStatus.Unknown
     }
 
-    override fun purchase(amount:String) {
+    var purchaseResultCallback :((PurchaseResultType, List<Any?>) -> Unit)? = null
+    override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit) {
+        this.purchaseResultCallback = purchaseResultCallback;
         if(!activity.isPackageInstalled(PACKAGE_NAME))
         {
-            //TODO : NOVIN POS NOT INSTALLED
+            purchaseResultCallback.invoke(PurchaseResultType.Failed , listOf("","","برنامه پوس نوین نصب نشده است"))
         }
         else {
 
@@ -69,76 +72,68 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
         if(requestCode == 1002) {
             if (resultCode == Activity.RESULT_OK) {
                 val bundle = data!!.extras
-                var result = ""
                 try {
 
                     val jsonObject = JSONObject(bundle.getString("Result"))
 
                     if (jsonObject.getString("Status").equals("OK", ignoreCase = true)) {
-                        result += """
-                        شماره ترمینال:  ${jsonObject.getString("TerminalID")}
-                        
-                        """.trimIndent()
-                        if (jsonObject.has("STAN")) {
-                            result += """
-                            شماره پیگیری:  ${jsonObject.getString("STAN")}
-                            
-                            """.trimIndent()
-                        }
-                        if (jsonObject.has("RRN")) {
-                            result += """
-                            شماره مرجع:  ${jsonObject.getString("RRN")}
-                            
-                            """.trimIndent()
-                        }
-                        result += """
-                        کد پاسخ:  ${jsonObject.getString("ResponseCode")}
-                        
-                        """.trimIndent()
-                        result += """
-                        شماره کارت: ${jsonObject.getString("CustomerCardNO")}
-                        
-                        """.trimIndent()
-                        result += """
-                        زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
-                        
-                        """.trimIndent()
-                        //                    result +=  "وضعیت تراکنش" + ":  " + ((jsonObject.getString("Status").equalsIgnoreCase("OK"))?"موفق":"ناموفق") + "\n";
-//                    result +=  "شماره پذیرنده" + ":  " + jsonObject.getString("MerchantId") + "\n";
-//                    result +=  "کد پستی" + ":  " + jsonObject.getString("PostalCode") + "\n";
+//                        result += """
+//                        شماره ترمینال:  ${jsonObject.getString("TerminalID")}
+//
+//                        """.trimIndent()
+//                        if (jsonObject.has("STAN")) {
+//                            result += """
+//                            شماره پیگیری:  ${jsonObject.getString("STAN")}
+//
+//                            """.trimIndent()
+//                        }
+//                        if (jsonObject.has("RRN")) {
+//                            result += """
+//                            شماره مرجع:  ${jsonObject.getString("RRN")}
+//
+//                            """.trimIndent()
+//                        }
+//                        result += """
+//                        کد پاسخ:  ${jsonObject.getString("ResponseCode")}
+//
+//                        """.trimIndent()
+//                        result += """
+//                        شماره کارت: ${jsonObject.getString("CustomerCardNO")}
+//
+//                        """.trimIndent()
+//                        result += """
+//                        زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
+//
+//                        """.trimIndent()
+//                        //                    result +=  "وضعیت تراکنش" + ":  " + ((jsonObject.getString("Status").equalsIgnoreCase("OK"))?"موفق":"ناموفق") + "\n";
+////                    result +=  "شماره پذیرنده" + ":  " + jsonObject.getString("MerchantId") + "\n";
+////                    result +=  "کد پستی" + ":  " + jsonObject.getString("PostalCode") + "\n";
+                        purchaseResultCallback?.invoke(PurchaseResultType.Succeed, arrayListOf(jsonObject.getString("TerminalID"), jsonObject.getString("MerchantId"), "posSerial", "reserveNumber", "traceNumber", jsonObject.getString("RRN"), "ref", "amount", "txnDate", "txnTime", "maskedPan"))
 
                     } else {
-                        if (jsonObject.has("TerminalID")) {
-                            result += """
-                            شماره ترمینال:  ${jsonObject.getString("TerminalID")}
-                            
-                            """.trimIndent()
-                        }
-                        if (jsonObject.has("ResponseCode")) {
-                            result += """
-                            کد پاسخ:  ${jsonObject.getString("ResponseCode")}
-                            
-                            """.trimIndent()
-                        }
 
-                        if (jsonObject.has("Description")) {
-                            result += """
-                            خطا:  ${jsonObject.getString("Description")}
-                            
-                            """.trimIndent()
-                        }
-                        if (jsonObject.has("CustomerCardNO")) {
-                            result += """
-                            شماره کارت: ${jsonObject.getString("CustomerCardNO")}
-                            
-                            """.trimIndent()
-                        }
-                        if (jsonObject.has("TransactionDateTime")) {
-                            result += """
-                            زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
-                            
-                            """.trimIndent()
-                        }
+//                        if (jsonObject.has("ResponseCode")) {
+//                            result += """
+//                            کد پاسخ:  ${jsonObject.getString("ResponseCode")}
+//
+//                            """.trimIndent()
+//                        }
+//
+//
+//                        if (jsonObject.has("CustomerCardNO")) {
+//                            result += """
+//                            شماره کارت: ${}
+//
+//                            """.trimIndent()
+//                        }
+//                        if (jsonObject.has("TransactionDateTime")) {
+//                            result += """
+//                            زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
+//
+//                            """.trimIndent()
+//                        }
+
+                        purchaseResultCallback?.invoke(PurchaseResultType.Failed, arrayListOf(jsonObject.getString("ResponseCode"), jsonObject.getString("Description"), jsonObject.getString("TerminalID"), jsonObject.getString("MerchantId"), "posSerial", "reserveNumber", "traceNumber", "rrn", "ref", "amount", "txnDate", "txnTime", "maskedPan"))
                     }
                 } catch (e: JSONException) {
                     e.printStackTrace()

@@ -34,71 +34,74 @@ class RahyabPosSdk(private var activity: Activity) : PosSdk {
         }
 
 
-    override fun purchase(amount: String) {
+    override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit) {
         when(hostApp){
-            HostApp.FANAVA-> fanavaPurchase(activity,"",amount)
-            HostApp.SEP -> sepPurchase(activity,"",amount)
-            HostApp.PEC -> pecPurchase(activity,"",amount)
+            HostApp.FANAVA-> fanavaPurchase(activity,"",amount,purchaseResultCallback)
+            HostApp.SEP -> sepPurchase(activity,"",amount,purchaseResultCallback)
+            HostApp.PEC -> pecPurchase(activity,"",amount,purchaseResultCallback)
         }
 
     }
 
-    private fun fanavaPurchase(activity: Activity, invoiceNumber:String, amount:String){
+    private fun fanavaPurchase(activity: Activity, invoiceNumber:String, amount:String, purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit){
         com.kishcore.sdk.fanava.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : com.kishcore.sdk.fanava.rahyab.api.PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?,panHash:String?) {
-                // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED, arrayListOf(reserveNumber, maskedPan, errorDescription))
+                purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,listOf(reserveNumber, maskedPan, errorDescription))
+
             }
 
             override fun onPaymentCancelled(reserveNumber: String?, maskedPan: String?,panHash:String?) {
-                // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_CANCELLED, arrayListOf(reserveNumber, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Cancelled,arrayListOf(reserveNumber, maskedPan))
             }
 
             override fun onPaymentSucceed(terminalNo: String?, merchantId: String?, posSerial: String?, reserveNumber: String?, traceNumber: String?, rrn: String?, ref: String?, amount: String?, txnDate: String?, txnTime: String?, maskedPan: String?,panHash:String?) {
-                // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_SUCCEED, arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Succeed,arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+
             }
 
             override fun onPaymentFailed(errorCode: Int, errorDescription: String, terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String,panHash:String?) {
-                // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_FAILED, arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Failed,arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+
             }
         })
     }
 
-    private  fun sepPurchase(activity: Activity,invoiceNumber: String,amount: String){
+    private  fun sepPurchase(activity: Activity,invoiceNumber: String,amount: String,purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit){
         com.kishcore.sdk.sep.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?) {
-              //  channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED, arrayListOf(reserveNumber, maskedPan, errorDescription))
+                purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,arrayListOf(reserveNumber, maskedPan, errorDescription))
             }
 
             override fun onPaymentCancelled(reserveNumber: String?, maskedPan: String?) {
-               // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_CANCELLED, arrayListOf(reserveNumber, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Cancelled,arrayListOf(reserveNumber, maskedPan))
             }
 
             override fun onPaymentSucceed(terminalNo: String?, merchantId: String?, posSerial: String?, reserveNumber: String?, traceNumber: String?, rrn: String?, ref: String?, amount: String?, txnDate: String?, txnTime: String?, maskedPan: String?) {
-               // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_SUCCEED, arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Succeed,arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
             }
 
 
             override fun onPaymentFailed(errorCode: Int, errorDescription: String, terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String) {
-               // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_FAILED, arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Failed,arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
             }
         })
     }
-    private fun pecPurchase(activity: Activity,invoiceNumber: String,amount: String)
+    private fun pecPurchase(activity: Activity,invoiceNumber: String,amount: String,purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit)
     {
         com.kishcore.sdk.parsian.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : com.kishcore.sdk.parsian.rahyab.api.PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String, maskedPan: String, errorDescription: String) {
-                //channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED, arrayListOf(reserveNumber, maskedPan, errorDescription))
+                purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,arrayListOf(reserveNumber, maskedPan, errorDescription))
             }
 
             override fun onPaymentSucceed(terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String) {
-                //channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_SUCCEED, arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Succeed,arrayListOf(terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
             }
 
             override fun onPaymentFailed(errorCode: Int, errorDescription: String, terminalNo: String, merchantId: String, posSerial: String, reserveNumber: String, traceNumber: String, rrn: String, ref: String, amount: String, txnDate: String, txnTime: String, maskedPan: String) {
-                //channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_FAILED, arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Failed,arrayListOf(errorCode, errorDescription, terminalNo, merchantId, posSerial, reserveNumber, traceNumber, rrn, ref, amount, txnDate, txnTime, maskedPan))
             }
             override fun onPaymentCancelled(reserveNumber: String, maskedPan: String) {
-               // channel?.invokeMethod(MobilePosPlugin.PURCHASE_ON_PAYMENT_CANCELLED, arrayListOf(reserveNumber, maskedPan))
+                purchaseResultCallback.invoke(PurchaseResultType.Cancelled,arrayListOf(reserveNumber, maskedPan))
             }
         })
     }
