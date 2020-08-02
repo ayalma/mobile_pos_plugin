@@ -6,10 +6,7 @@ import android.device.PrinterManager
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.NonNull
-import com.ayalma.mobile_pos_plugin.posSdk.PosSdk
-import com.ayalma.mobile_pos_plugin.posSdk.PosSdkFactory
-import com.ayalma.mobile_pos_plugin.posSdk.PurchaseResultType
-import com.ayalma.mobile_pos_plugin.posSdk.SdkType
+import com.ayalma.mobile_pos_plugin.posSdk.*
 import com.ayalma.mobile_pos_plugin.print.FactorPrintableData
 import com.kishcore.sdk.hybrid.api.DataCallback
 import com.kishcore.sdk.hybrid.api.HostApp
@@ -121,9 +118,24 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
 
     private fun init(result: Result, sdkType:String) {
         (activity?.let {
-            posSdk = PosSdkFactory.create(SdkType.valueOf(sdkType),it);
+            var type = SdkType.valueOf(sdkType);
+            posSdk = PosSdkFactory.create(type,it);
             registrar?.addActivityResultListener(posSdk);
             binding?.addActivityResultListener(posSdk as PluginRegistry.ActivityResultListener)
+            if(posSdk == null)
+            {
+                result.error("Sdk type not supported",null,null)
+            }
+            else{
+                if(type == SdkType.Rahyab && posSdk is RahyabPosSdk)
+                {
+                    result.success((posSdk as RahyabPosSdk).hostApp.name)
+                }
+                else{
+                    result.success(HostApp.UNKNOWN.name)
+                }
+            }
+
         }
                 ?: run {
                     result.error("Activity is null", null, null)
