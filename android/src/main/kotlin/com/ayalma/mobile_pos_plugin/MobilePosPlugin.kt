@@ -124,7 +124,6 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
             posSdk = PosSdkFactory.create(SdkType.valueOf(sdkType),it);
             registrar?.addActivityResultListener(posSdk);
             binding?.addActivityResultListener(posSdk as PluginRegistry.ActivityResultListener)
-            result.success(HostApp.UNKNOWN.name)
         }
                 ?: run {
                     result.error("Activity is null", null, null)
