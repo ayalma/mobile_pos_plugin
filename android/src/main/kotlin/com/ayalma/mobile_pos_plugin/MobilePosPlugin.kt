@@ -145,7 +145,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
         var invoiceNumber = args[0]
         var amount = args[1]
 
-        posSdk?.purchase(amount,invoiceNumber) { type: PurchaseResultType, data: List<Any?> ->
+        posSdk?.purchase(amount,invoiceNumber) { type: PurchaseResultType, data: Map<String, Any?> ->
             val methodName = when(type){
                 PurchaseResultType.InitializationFailed->PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED
                 PurchaseResultType.Cancelled->PURCHASE_ON_PAYMENT_CANCELLED
