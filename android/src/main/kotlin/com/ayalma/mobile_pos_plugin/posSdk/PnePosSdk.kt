@@ -32,12 +32,13 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
             else->PrinterStatus.Unknown
     }
 
-    var purchaseResultCallback :((PurchaseResultType, List<Any?>) -> Unit)? = null
-    override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType, List<Any?>) -> Unit) {
+    var purchaseResultCallback :((PurchaseResultType, Map<String,Any?>) -> Unit)? = null
+    override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType,Map<String,Any?>) -> Unit) {
         this.purchaseResultCallback = purchaseResultCallback;
         if(!activity.isPackageInstalled(PACKAGE_NAME))
         {
-            purchaseResultCallback.invoke(PurchaseResultType.Failed , listOf("","","برنامه پوس نوین نصب نشده است"))
+            var resultJson = mapOf(Pair("reserveNumber",""), Pair("maskedPan",""),Pair("errorDescription","برنامه پوس نوین نصب نشده است"))
+            purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed , resultJson)
         }
         else {
 
@@ -108,8 +109,21 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
 //                        //                    result +=  "وضعیت تراکنش" + ":  " + ((jsonObject.getString("Status").equalsIgnoreCase("OK"))?"موفق":"ناموفق") + "\n";
 ////                    result +=  "شماره پذیرنده" + ":  " + jsonObject.getString("MerchantId") + "\n";
 ////                    result +=  "کد پستی" + ":  " + jsonObject.getString("PostalCode") + "\n";
-                        purchaseResultCallback?.invoke(PurchaseResultType.Succeed, arrayListOf(jsonObject.getString("TerminalID"), jsonObject.getString("MerchantId"), "posSerial", "reserveNumber", "traceNumber", jsonObject.getString("RRN"), "ref", "amount", "txnDate", "txnTime", "maskedPan"))
-
+                        var resultJson = mapOf(
+                                Pair("terminalNo",jsonObject.getString("TerminalID")),
+                                Pair("merchantId",jsonObject.getString("MerchantId")),
+                                Pair("posSerial","posSerial"),
+                                Pair("reserveNumber","reserveNumber"),
+                                Pair("traceNumber","traceNumber"),
+                                Pair("rrn",jsonObject.getString("RRN")),
+                                Pair("ref","ref"),
+                                Pair("amount","amount"),
+                                Pair("txnDate","txnDate"),
+                                Pair("txnTime","txnTime"),
+                                Pair("maskedPan","maskedPan"),
+                                Pair("panHash","panHash")
+                        )
+                        purchaseResultCallback?.invoke(PurchaseResultType.Succeed, resultJson)
                     } else {
 
 //                        if (jsonObject.has("ResponseCode")) {
@@ -132,8 +146,25 @@ class PnePosSdk(private var activity: Activity) : PosSdk {
 //
 //                            """.trimIndent()
 //                        }
+                        var resultJson = mapOf(
+                                Pair("errorCode",jsonObject.getString("ResponseCode")),
+                                Pair("errorDescription",jsonObject.getString("Description")),
+                                Pair("terminalNo",jsonObject.getString("TerminalID")),
+                                Pair("merchantId",jsonObject.getString("MerchantId")),
+                                Pair("posSerial","posSerial"),
+                                Pair("reserveNumber","reserveNumber"),
+                                Pair("traceNumber","traceNumber"),
+                                Pair("rrn","rrn"),
+                                Pair("ref","ref"),
+                                Pair("amount","amount"),
+                                Pair("txnDate","txnDate"),
+                                Pair("txnTime","txnTime"),
+                                Pair("maskedPan","maskedPan"),
+                                Pair("panHash","panHash")
+                        )
 
-                        purchaseResultCallback?.invoke(PurchaseResultType.Failed, arrayListOf(jsonObject.getString("ResponseCode"), jsonObject.getString("Description"), jsonObject.getString("TerminalID"), jsonObject.getString("MerchantId"), "posSerial", "reserveNumber", "traceNumber", "rrn", "ref", "amount", "txnDate", "txnTime", "maskedPan"))
+
+                        purchaseResultCallback?.invoke(PurchaseResultType.Failed,resultJson)
                     }
                 } catch (e: JSONException) {
                     e.printStackTrace()

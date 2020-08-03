@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:commons/commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos_plugin/src/host_app.dart';
@@ -133,8 +134,8 @@ class MobilePosPlugin {
     return printComplater.future;
   }
 
-  Completer<PaymentResult> _purchaseComplator;
-  Future<PaymentResult> purchase(
+  Completer<PurchaseResponse> _purchaseComplator;
+  Future<PurchaseResponse> purchase(
     String invoiceNumber,
     String amount,
     HostApp hostApp,
@@ -161,20 +162,31 @@ class MobilePosPlugin {
           return _printerPrintCallback(call.arguments);
         return Future.value();
       case _PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED:
-        _purchaseComplator.complete(
-            PaymentInitializationFailed.fromList(_hostApp, call.arguments));
+        var map = call.arguments as Map<String, dynamic>;
+        final result = PurchaseInitFailed.fromJson(map);
+        result.bankType = _hostApp.toString();
+        _purchaseComplator.complete(result);
         return Future.value();
       case _PURCHASE_ON_PAYMENT_CANCELLED:
-        _purchaseComplator
-            .complete(PaymentCancelled.fromList(_hostApp, call.arguments));
+        var map = call.arguments as Map<String, dynamic>;
+        final result = PurchaseInitFailed.fromJson(map);
+        result.bankType = _hostApp.toString();
+        _purchaseComplator.complete(result);
+
         return Future.value();
       case _PURCHASE_ON_PAYMENT_FAILED:
-        _purchaseComplator
-            .complete(PaymentFailed.fromList(_hostApp, call.arguments));
+        var map = call.arguments as Map<String, dynamic>;
+        final result = PurchaseInitFailed.fromJson(map);
+        result.bankType = _hostApp.toString();
+        _purchaseComplator.complete(result);
+
         return Future.value();
       case _PURCHASE_ON_PAYMENT_SUCCEED:
-        _purchaseComplator
-            .complete(PaymentSucceed.fromList(_hostApp, call.arguments));
+        var map = call.arguments as Map<String, dynamic>;
+        final result = PurchaseInitFailed.fromJson(map);
+        result.bankType = _hostApp.toString();
+        _purchaseComplator.complete(result);
+
         return Future.value();
       default:
         return Future.error('method not defined');
