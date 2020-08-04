@@ -46,7 +46,11 @@ class RahyabPosSdk(private var activity: Activity) : PosSdk {
     private fun fanavaPurchase(activity: Activity, invoiceNumber:String, amount:String, purchaseResultCallback: (PurchaseResultType, Map<String,Any?>) -> Unit){
         com.kishcore.sdk.fanava.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : com.kishcore.sdk.fanava.rahyab.api.PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?,panHash:String?) {
-               var resultJson = mapOf(Pair("reserveNumber",reserveNumber), Pair("maskedPan",maskedPan),Pair("errorDescription",errorDescription), Pair("panHash",panHash))
+               var resultJson = hashMapOf<String,Any?>(
+                       "reserveNumber" to reserveNumber,
+                       "maskedPan" to maskedPan,
+                       "errorDescription" to errorDescription,
+                       "panHash" to panHash)
                 purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,resultJson)
 
             }
@@ -101,7 +105,10 @@ class RahyabPosSdk(private var activity: Activity) : PosSdk {
     private  fun sepPurchase(activity: Activity,invoiceNumber: String,amount: String,purchaseResultCallback: (PurchaseResultType, Map<String,Any?>) -> Unit){
         com.kishcore.sdk.sep.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String?, maskedPan: String?, errorDescription: String?) {
-                var resultJson = mapOf(Pair("reserveNumber",reserveNumber), Pair("maskedPan",maskedPan),Pair("errorDescription",errorDescription))
+                var resultJson = hashMapOf<String,Any?>(
+                        "reserveNumber" to reserveNumber,
+                        "maskedPan" to maskedPan,
+                        "errorDescription" to errorDescription)
                 purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,resultJson)
             }
 
@@ -153,7 +160,10 @@ class RahyabPosSdk(private var activity: Activity) : PosSdk {
     {
         com.kishcore.sdk.parsian.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : com.kishcore.sdk.parsian.rahyab.api.PaymentCallback {
             override fun onPaymentInitializationFailed(reserveNumber: String, maskedPan: String, errorDescription: String) {
-                var resultJson = mapOf(Pair("reserveNumber",reserveNumber), Pair("maskedPan",maskedPan),Pair("errorDescription",errorDescription))
+                var resultJson = hashMapOf<String,Any?>(
+                        "reserveNumber" to reserveNumber,
+                        "maskedPan" to maskedPan,
+                        "errorDescription" to errorDescription)
                 purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed,resultJson)
             }
 
