@@ -1,5 +1,4 @@
 // left scan keyCode
-import 'package:flutter/services.dart';
 
 const int LEFT_SCAN_KEY = 132;
 // right scan keyCode

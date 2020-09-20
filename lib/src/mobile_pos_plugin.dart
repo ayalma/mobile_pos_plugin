@@ -1,13 +1,12 @@
 import 'dart:async';
+
 import 'dart:typed_data';
 
 import 'package:commons/commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_pos_plugin/src/host_app.dart';
-import 'package:mobile_pos_plugin/src/payment.dart';
 import 'package:mobile_pos_plugin/src/printer_status.dart';
-import 'package:mobile_pos_plugin/src/sdk_type.dart';
 
 typedef OpenMagnetCallback = Future<void> Function(List<String>);
 typedef OpenBarcodeScannerSuccessCallback = Future<void> Function(
@@ -16,12 +15,6 @@ typedef OpenBarcodeScannerFailureCallback = Future<void> Function(
     List<dynamic>);
 
 typedef PrinterPrintCallback = Future<void> Function(List<dynamic>);
-
-typedef PaymentCancelledCallback = Future<void> Function(PaymentCancelled);
-typedef PaymentInitializationFailedCallback = Future<void> Function(
-    PaymentInitializationFailed);
-typedef PaymentFailedCallback = Future<void> Function(PaymentFailed);
-typedef PaymentSucceedCallback = Future<void> Function(PaymentSucceed);
 
 class MobilePosPlugin {
   static const String _INIT = "init";
@@ -78,10 +71,10 @@ class MobilePosPlugin {
   ///
   /// with this method you will init the payment lib
   ///
-  Future<HostApp> init(SdkType sdkType) async {
-    _hostApp = await _methodChannel.invokeMethod(_INIT, [
-      sdkType.toString().replaceAll('SdkType.', '')
-    ]).then((hostName) => parseHostApp(hostName));
+  Future<HostApp> init(PcPosConfig config) async {
+    _hostApp = await _methodChannel
+        .invokeMethod(_INIT, [config.id, config.creditCardType.id]).then(
+            (hostName) => parseHostApp(hostName));
     return _hostApp;
   }
 
@@ -162,29 +155,26 @@ class MobilePosPlugin {
           return _printerPrintCallback(call.arguments);
         return Future.value();
       case _PURCHASE_ON_PAYMENT_INITIALIZATION_FAILED:
-        var map = call.arguments as Map<String, dynamic>;
-        final result = PurchaseInitFailed.fromJson(map);
-        result.bankType = _hostApp.toString();
+        final result = PurchaseInitFailed.fromJson(
+            Map<String, dynamic>.from(call.arguments));
+
         _purchaseComplator.complete(result);
         return Future.value();
       case _PURCHASE_ON_PAYMENT_CANCELLED:
-        var map = call.arguments as Map<String, dynamic>;
-        final result = PurchaseInitFailed.fromJson(map);
-        result.bankType = _hostApp.toString();
+        final result = PurchaseCanceled.fromJson(
+            Map<String, dynamic>.from(call.arguments));
         _purchaseComplator.complete(result);
 
         return Future.value();
       case _PURCHASE_ON_PAYMENT_FAILED:
-        var map = call.arguments as Map<String, dynamic>;
-        final result = PurchaseInitFailed.fromJson(map);
-        result.bankType = _hostApp.toString();
+        final result = PurchaseInitFailed.fromJson(
+            Map<String, dynamic>.from(call.arguments));
         _purchaseComplator.complete(result);
 
         return Future.value();
       case _PURCHASE_ON_PAYMENT_SUCCEED:
-        var map = call.arguments as Map<String, dynamic>;
-        final result = PurchaseInitFailed.fromJson(map);
-        result.bankType = _hostApp.toString();
+        final result =
+            PurchaseSuscces.fromJson(Map<String, dynamic>.from(call.arguments));
         _purchaseComplator.complete(result);
 
         return Future.value();

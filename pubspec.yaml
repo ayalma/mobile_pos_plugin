@@ -12,7 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   commons:
-    git: https://github.com/ayalma/esc_pos_commons.git
+    path: ../commons
+    #git: https://github.com/ayalma/esc_pos_commons.git
 
 dev_dependencies:
   flutter_test:

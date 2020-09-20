@@ -9,7 +9,7 @@ import com.ayalma.mobile_pos_plugin.isPackageInstalled
 import org.json.JSONException
 import org.json.JSONObject
 
-class PnePosSdk(private var activity: Activity) : PosSdk {
+class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType) : PosSdk {
     var printerManager : PrinterManager = PrinterManager();
     private val PACKAGE_NAME = "ir.co.pna.pos"
 

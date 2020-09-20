@@ -107,7 +107,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
 
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) = when (call.method) {
-        INIT -> init(result,(call.arguments as List<String>)[0])
+        INIT -> init(result,(call.arguments as List<Int>)[0],(call.arguments as List<Int>)[1])
         OPEN_MAGNETIC_CARD_READER -> openMagneticStripeCardReader(result)
         OPEN_BARCODE_SCANNER -> openBarcodeScanner(result)
         GET_PRINTER_STATUS -> getPrinterStatus(result)
@@ -116,10 +116,10 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
         else -> result.notImplemented()
     }
 
-    private fun init(result: Result, sdkType:String) {
+    private fun init(result: Result, pcPosId:Int,creditCardId:Int) {
         (activity?.let {
-            var type = SdkType.valueOf(sdkType);
-            posSdk = PosSdkFactory.create(type,it);
+            var pcPosType = PcPosType.valueOf(pcPosId,creditCardId);
+            posSdk = PosSdkFactory.create(pcPosType,it);
             registrar?.addActivityResultListener(posSdk);
             binding?.addActivityResultListener(posSdk as PluginRegistry.ActivityResultListener)
             if(posSdk == null)
@@ -127,7 +127,7 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
                 result.error("Sdk type not supported",null,null)
             }
             else{
-                if(type == SdkType.Rahyab && posSdk is RahyabPosSdk)
+                if(pcPosType == PcPosType.Rahyab && posSdk is RahyabPosSdk)
                 {
                     result.success((posSdk as RahyabPosSdk).hostApp.name)
                 }
@@ -153,7 +153,6 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
                 else -> PURCHASE_ON_PAYMENT_FAILED
             }
             channel?.invokeMethod(methodName, data)
-
         }
 
         result.success(true);

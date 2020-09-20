@@ -88,11 +88,9 @@ packages:
   commons:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "082c71f898cf0e6d33a4673b983cc98e7bb7373b"
-      url: "https://github.com/ayalma/esc_pos_commons.git"
-    source: git
+      path: "../../commons"
+      relative: true
+    source: path
     version: "0.0.1"
   convert:
     dependency: transitive

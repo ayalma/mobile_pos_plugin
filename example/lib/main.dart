@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      await mobilePosPlugin.init(SdkType.Rahyab);
+      await mobilePosPlugin.init(null);
 
       platformVersion = mobilePosPlugin.toString();
     } on PlatformException {
