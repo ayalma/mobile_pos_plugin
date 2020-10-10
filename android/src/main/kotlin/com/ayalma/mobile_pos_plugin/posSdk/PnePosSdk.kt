@@ -33,6 +33,7 @@ class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType)
     }
 
     var purchaseResultCallback :((PurchaseResultType, Map<String,Any?>) -> Unit)? = null
+    var amount = "0"
     override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType,Map<String,Any?>) -> Unit) {
         this.purchaseResultCallback = purchaseResultCallback;
         if(!activity.isPackageInstalled(PACKAGE_NAME))
@@ -41,7 +42,7 @@ class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType)
             purchaseResultCallback.invoke(PurchaseResultType.InitializationFailed , resultJson)
         }
         else {
-
+            this.amount = amount
             val intent = Intent("ir.co.pna.pos.view.cart.IAPCActivity")
             intent.setPackage(PACKAGE_NAME)
             val bundle = Bundle()
@@ -67,6 +68,8 @@ class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType)
         }
     }
 
+    override fun destroy() {}
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
 
@@ -78,91 +81,21 @@ class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType)
                     val jsonObject = JSONObject(bundle.getString("Result"))
 
                     if (jsonObject.getString("Status").equals("OK", ignoreCase = true)) {
-//                        result += """
-//                        شماره ترمینال:  ${jsonObject.getString("TerminalID")}
-//
-//                        """.trimIndent()
-//                        if (jsonObject.has("STAN")) {
-//                            result += """
-//                            شماره پیگیری:  ${jsonObject.getString("STAN")}
-//
-//                            """.trimIndent()
-//                        }
-//                        if (jsonObject.has("RRN")) {
-//                            result += """
-//                            شماره مرجع:  ${jsonObject.getString("RRN")}
-//
-//                            """.trimIndent()
-//                        }
-//                        result += """
-//                        کد پاسخ:  ${jsonObject.getString("ResponseCode")}
-//
-//                        """.trimIndent()
-//                        result += """
-//                        شماره کارت: ${jsonObject.getString("CustomerCardNO")}
-//
-//                        """.trimIndent()
-//                        result += """
-//                        زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
-//
-//                        """.trimIndent()
-//                        //                    result +=  "وضعیت تراکنش" + ":  " + ((jsonObject.getString("Status").equalsIgnoreCase("OK"))?"موفق":"ناموفق") + "\n";
-////                    result +=  "شماره پذیرنده" + ":  " + jsonObject.getString("MerchantId") + "\n";
-////                    result +=  "کد پستی" + ":  " + jsonObject.getString("PostalCode") + "\n";
                         var resultJson = mapOf(
                                 Pair("terminalNo",jsonObject.getString("TerminalID")),
-                                Pair("merchantId",jsonObject.getString("MerchantId")),
-                                Pair("posSerial","posSerial"),
-                                Pair("reserveNumber","reserveNumber"),
-                                Pair("traceNumber","traceNumber"),
-                                Pair("rrn",jsonObject.getString("RRN")),
-                                Pair("ref","ref"),
-                                Pair("amount","amount"),
-                                Pair("txnDate","txnDate"),
-                                Pair("txnTime","txnTime"),
-                                Pair("maskedPan","maskedPan"),
-                                Pair("panHash","panHash")
+                                Pair("traceNumber",jsonObject.getString("STAN")),
+                                Pair("referenceNo",jsonObject.getString("RRN")),
+                                Pair("amount",amount),
+                                Pair("maskedPan",jsonObject.getString("CustomerCardNO")),
+                                Pair("pcPosId",pcPosType.pcPosId),
+                                Pair("creditTypeId",pcPosType.creditTypeId)
                         )
                         purchaseResultCallback?.invoke(PurchaseResultType.Succeed, resultJson)
                     } else {
-
-//                        if (jsonObject.has("ResponseCode")) {
-//                            result += """
-//                            کد پاسخ:  ${jsonObject.getString("ResponseCode")}
-//
-//                            """.trimIndent()
-//                        }
-//
-//
-//                        if (jsonObject.has("CustomerCardNO")) {
-//                            result += """
-//                            شماره کارت: ${}
-//
-//                            """.trimIndent()
-//                        }
-//                        if (jsonObject.has("TransactionDateTime")) {
-//                            result += """
-//                            زمان تراکنش:  ${jsonObject.getString("TransactionDateTime")}
-//
-//                            """.trimIndent()
-//                        }
                         var resultJson = mapOf(
                                 Pair("errorCode",jsonObject.getString("ResponseCode")),
-                                Pair("errorDescription",jsonObject.getString("Description")),
-                                Pair("terminalNo",jsonObject.getString("TerminalID")),
-                                Pair("merchantId",jsonObject.getString("MerchantId")),
-                                Pair("posSerial","posSerial"),
-                                Pair("reserveNumber","reserveNumber"),
-                                Pair("traceNumber","traceNumber"),
-                                Pair("rrn","rrn"),
-                                Pair("ref","ref"),
-                                Pair("amount","amount"),
-                                Pair("txnDate","txnDate"),
-                                Pair("txnTime","txnTime"),
-                                Pair("maskedPan","maskedPan"),
-                                Pair("panHash","panHash")
+                                Pair("errorDescription",jsonObject.getString("Description"))
                         )
-
 
                         purchaseResultCallback?.invoke(PurchaseResultType.Failed,resultJson)
                     }
@@ -170,8 +103,11 @@ class PnePosSdk(private var activity: Activity,private var pcPosType: PcPosType)
                     e.printStackTrace()
                 }
             }
-            return true;
+            else{
+                purchaseResultCallback?.invoke(PurchaseResultType.Cancelled,emptyMap<String,Any?>())
+            }
+            return true
         }
-        return false;
+        return false
     }
 }

@@ -72,9 +72,11 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
     }
 
     override fun onDetachedFromActivity() {
+        posSdk?.destroy()
+        posSdk = null
         activity = null
         binding = null
-        Log.d("Hybrid", "on detached form activity")
+
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -85,11 +87,9 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         this.binding = binding
         activity = binding.activity;
-        Log.d("Hybrid", "on Attached to activity")
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        Log.d("Hybrid", "on detached from activity for config changes")
     }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -141,6 +141,8 @@ public class MobilePosPlugin : FlutterPlugin, MethodCallHandler, ActivityAware{
                     result.error("Activity is null", null, null)
                 })
     }
+
+
     private fun purchase(result: Result, args: List<String>) {
         var invoiceNumber = args[0]
         var amount = args[1]

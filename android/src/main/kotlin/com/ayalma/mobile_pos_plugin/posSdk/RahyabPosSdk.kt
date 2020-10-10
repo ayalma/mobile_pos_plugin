@@ -36,12 +36,15 @@ class RahyabPosSdk(private var activity: Activity,private var pcPosType: PcPosTy
 
     override fun purchase(amount: String, invoiceNumber: String, purchaseResultCallback: (PurchaseResultType, Map<String,Any?>) -> Unit) {
         when(hostApp){
-            HostApp.FANAVA-> fanavaPurchase(activity,"",amount,purchaseResultCallback)
-            HostApp.SEP -> sepPurchase(activity,"",amount,purchaseResultCallback)
-            HostApp.PEC -> pecPurchase(activity,"",amount,purchaseResultCallback)
+            HostApp.FANAVA-> fanavaPurchase(activity,invoiceNumber,amount,purchaseResultCallback)
+            HostApp.SEP -> sepPurchase(activity,invoiceNumber,amount,purchaseResultCallback)
+            HostApp.PEC -> pecPurchase(activity,invoiceNumber,amount,purchaseResultCallback)
         }
 
     }
+
+    override fun destroy() {}
+
 
     private fun fanavaPurchase(activity: Activity, invoiceNumber:String, amount:String, purchaseResultCallback: (PurchaseResultType, Map<String,Any?>) -> Unit){
         com.kishcore.sdk.fanava.rahyab.api.SDKManager.purchase(activity, invoiceNumber, amount, object : com.kishcore.sdk.fanava.rahyab.api.PaymentCallback {

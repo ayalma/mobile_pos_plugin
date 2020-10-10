@@ -8,6 +8,8 @@ object PosSdkFactory {
         return when(type) {
             PcPosType.Rahyab -> RahyabPosSdk(activity,type)
             PcPosType.Parsian-> ParsianPosSdk(activity,type)
+
+            PcPosType.Pne -> PnePosSdk(activity,type)
             PcPosType.Saman -> PnePosSdk(activity,type)
             else -> null
         }

@@ -6,7 +6,8 @@ import java.util.Map;
 public enum  PcPosType {
     Parsian(4,6),
     Saman(21,26),
-    Rahyab(23,29);
+    Rahyab(23,29),
+    Pne(15,17);
 
     private int pcPosId;
     private  int creditTypeId;
